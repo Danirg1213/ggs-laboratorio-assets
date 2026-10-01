@@ -1,0 +1,2340 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+  <base target="\_top">
+
+  <meta charset="UTF-8">
+
+  <meta name="theme-color" content="#0b5d3b">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Agenda GGS">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="../favicon-192.png">
+  <link rel="apple-touch-icon" href="../favicon-192.png">
+
+
+
+  <style>
+
+    :root {
+
+      --verde: #0b5d3b;
+
+      --verde-suave: #eaf4ef;
+
+      --fondo: #f4f6f5;
+
+      --tarjeta: #ffffff;
+
+      --texto: #1d2925;
+
+      --muted: #66756f;
+
+      --borde: #dbe3df;
+
+      --hora: 62px;
+
+      --dia-min: 128px;
+
+      --radio: 10px;
+
+    }
+
+
+
+    * {
+
+      box-sizing: border-box;
+
+    }
+
+
+
+    html,
+
+    body {
+
+      margin: 0;
+
+      padding: 0;
+
+      background: var(--fondo);
+
+      color: var(--texto);
+
+      font-family: Arial, Helvetica, sans-serif;
+
+    }
+
+
+
+    body {
+
+      min-width: 320px;
+
+    }
+
+
+
+    .app {
+
+      padding: 10px;
+
+    }
+
+
+
+    .topbar {
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      gap: 10px;
+
+      margin-bottom: 8px;
+
+    }
+
+
+
+    .titulo h1 {
+
+      margin: 0;
+
+      font-size: 18px;
+
+      line-height: 1.1;
+
+    }
+
+
+
+    .titulo .sub {
+
+      margin-top: 3px;
+
+      color: var(--muted);
+
+      font-size: 12px;
+
+    }
+
+
+
+    .nav {
+
+      display: flex;
+
+      gap: 6px;
+
+      flex-wrap: wrap;
+
+      justify-content: flex-end;
+
+    }
+
+
+
+    button {
+
+      border: 1px solid var(--borde);
+
+      background: #fff;
+
+      color: var(--texto);
+
+      border-radius: 8px;
+
+      min-height: 38px;
+
+      padding: 7px 10px;
+
+      font-weight: 700;
+
+      cursor: pointer;
+
+    }
+
+
+
+    button.primary {
+
+      background: var(--verde);
+
+      color: #fff;
+
+      border-color: var(--verde);
+
+    }
+
+
+
+    button:disabled {
+
+      opacity: .55;
+
+      cursor: default;
+
+    }
+
+
+
+    .resumen {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 12px;
+
+      flex-wrap: wrap;
+
+      margin: 0 0 8px;
+
+      padding: 7px 10px;
+
+      background: #fff;
+
+      border: 1px solid var(--borde);
+
+      border-radius: var(--radio);
+
+      font-size: 12px;
+
+    }
+
+
+
+    .resumen strong {
+
+      font-size: 14px;
+
+    }
+
+
+
+    .actualizado {
+
+      margin-left: auto;
+
+      color: var(--muted);
+
+    }
+
+
+
+    .orientacion {
+
+      display: none;
+
+      margin-bottom: 8px;
+
+      padding: 8px 10px;
+
+      border-radius: 8px;
+
+      background: #fff8dc;
+
+      border: 1px solid #ead88a;
+
+      font-size: 12px;
+
+      font-weight: 700;
+
+    }
+
+
+
+    .calendar-wrap {
+
+      overflow-x: auto;
+
+      overflow-y: visible;
+
+      border: 1px solid var(--borde);
+
+      border-radius: 12px;
+
+      background: #fff;
+
+
+
+      overscroll-behavior-x: contain;
+
+      -webkit-overflow-scrolling: touch;
+
+
+
+      touch-action: pan-x pan-y;
+
+
+
+      scrollbar-width: thin;
+
+      scroll-behavior: smooth;
+
+    }
+
+
+
+    .calendar {
+
+      min-width: calc(var(--hora) + 6 * var(--dia-min));
+
+      display: grid;
+
+      grid-template-columns:
+
+        var(--hora)
+
+        repeat(6, minmax(var(--dia-min), 1fr));
+
+      position: relative;
+
+    }
+
+
+
+    .head {
+
+      position: sticky;
+
+      top: 0;
+
+      z-index: 8;
+
+
+
+      min-height: 48px;
+
+      padding: 7px 6px;
+
+
+
+      background: #f8faf9;
+
+
+
+      border-bottom: 1px solid var(--borde);
+
+      border-right: 1px solid var(--borde);
+
+
+
+      display: flex;
+
+      flex-direction: column;
+
+      justify-content: center;
+
+
+
+      text-align: center;
+
+    }
+
+
+
+    .head.hora-head {
+
+      left: 0;
+
+      z-index: 10;
+
+    }
+
+
+
+    .head .dia {
+
+      font-weight: 800;
+
+      font-size: 13px;
+
+    }
+
+
+
+    .head .fecha {
+
+      color: var(--muted);
+
+      font-size: 11px;
+
+      margin-top: 2px;
+
+    }
+
+
+
+    .time {
+
+      position: sticky;
+
+      left: 0;
+
+      z-index: 5;
+
+
+
+      min-height: 52px;
+
+      padding: 7px 5px;
+
+
+
+      background: #fbfcfb;
+
+
+
+      border-bottom: 1px solid var(--borde);
+
+      border-right: 1px solid var(--borde);
+
+
+
+      font-size: 11px;
+
+      font-weight: 800;
+
+
+
+      text-align: center;
+
+
+
+      color: var(--muted);
+
+    }
+
+
+
+    .slot {
+
+      min-height: 52px;
+
+      padding: 3px;
+
+
+
+      border-bottom: 1px solid var(--borde);
+
+      border-right: 1px solid var(--borde);
+
+
+
+      background: #fff;
+
+    }
+
+
+
+    .slot.empty::after {
+
+      content: "";
+
+      display: block;
+
+      height: 100%;
+
+      min-height: 44px;
+
+    }
+
+
+
+    .pedido {
+
+      width: 100%;
+
+
+
+      border: 1px solid #c7d7cf;
+
+      border-left: 4px solid var(--verde);
+
+
+
+      border-radius: 7px;
+
+
+
+      padding: 5px 6px;
+
+
+
+      background: var(--verde-suave);
+
+
+
+      cursor: pointer;
+
+
+
+      text-align: left;
+
+
+
+      margin: 0 0 3px;
+
+
+
+      font-weight: 400;
+
+
+
+      min-height: auto;
+
+
+
+      touch-action: pan-x pan-y;
+
+
+
+      -webkit-tap-highlight-color: transparent;
+
+
+
+      user-select: none;
+
+    }
+
+
+
+    .pedido:last-child {
+
+      margin-bottom: 0;
+
+    }
+
+
+
+    .pedido .linea1 {
+
+      display: flex;
+
+      align-items: baseline;
+
+      justify-content: space-between;
+
+
+
+      gap: 4px;
+
+
+
+      font-weight: 800;
+
+      font-size: 11px;
+
+    }
+
+
+
+    .pedido .cliente {
+
+      font-size: 11px;
+
+
+
+      white-space: nowrap;
+
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+
+
+
+      margin-top: 2px;
+
+    }
+
+
+
+    .pedido .obra {
+
+      font-size: 10px;
+
+
+
+      color: var(--muted);
+
+
+
+      white-space: nowrap;
+
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+
+
+
+      margin-top: 1px;
+
+    }
+
+
+
+    .loading,
+
+    .error {
+
+      padding: 28px;
+
+      text-align: center;
+
+      color: var(--muted);
+
+    }
+
+
+
+    .error {
+
+      color: #9b2c2c;
+
+      font-weight: 700;
+
+    }
+
+
+
+    dialog {
+
+      width: min(92vw, 470px);
+
+
+
+      border: 0;
+
+
+
+      border-radius: 14px;
+
+
+
+      padding: 0;
+
+
+
+      box-shadow: 0 18px 60px rgba(0, 0, 0, .25);
+
+    }
+
+
+
+    dialog::backdrop {
+
+      background: rgba(0, 0, 0, .42);
+
+    }
+
+
+
+    .modal-head {
+
+      padding: 14px 16px;
+
+
+
+      background: var(--verde);
+
+
+
+      color: #fff;
+
+
+
+      display: flex;
+
+
+
+      justify-content: space-between;
+
+
+
+      gap: 10px;
+
+
+
+      align-items: center;
+
+    }
+
+
+
+    .modal-head h2 {
+
+      margin: 0;
+
+      font-size: 16px;
+
+    }
+
+
+
+    .modal-head button {
+
+      min-height: 34px;
+
+
+
+      padding: 4px 9px;
+
+
+
+      background: rgba(255, 255, 255, .15);
+
+
+
+      color: #fff;
+
+
+
+      border-color: rgba(255, 255, 255, .35);
+
+    }
+
+
+
+    .modal-body {
+
+      padding: 14px 16px 16px;
+
+    }
+
+
+
+    .dato {
+
+      display: grid;
+
+
+
+      grid-template-columns: 105px 1fr;
+
+
+
+      gap: 8px;
+
+
+
+      padding: 6px 0;
+
+
+
+      border-bottom: 1px solid #edf1ef;
+
+
+
+      font-size: 13px;
+
+    }
+
+
+
+    .dato:last-child {
+
+      border-bottom: 0;
+
+    }
+
+
+
+    .dato b {
+
+      color: var(--muted);
+
+
+
+      font-size: 11px;
+
+
+
+      text-transform: uppercase;
+
+
+
+      letter-spacing: .03em;
+
+    }
+
+
+
+    .dato span {
+
+      word-break: break-word;
+
+    }
+
+
+
+    @media (orientation: portrait) and (max-width: 700px) {
+
+
+
+      :root {
+
+        --dia-min: 150px;
+
+        --hora: 56px;
+
+      }
+
+
+
+      .orientacion {
+
+        display: block;
+
+      }
+
+
+
+      .app {
+
+        padding: 7px;
+
+      }
+
+
+
+      .titulo h1 {
+
+        font-size: 16px;
+
+      }
+
+
+
+      .topbar {
+
+        align-items: flex-start;
+
+      }
+
+
+
+      .nav button {
+
+        min-height: 36px;
+
+        padding: 6px 8px;
+
+      }
+
+    }
+
+
+
+    @media (orientation: landscape) and (max-height: 650px) {
+
+
+
+      :root {
+
+        --dia-min: 145px;
+
+        --hora: 54px;
+
+      }
+
+
+
+      .app {
+
+        padding: 6px;
+
+      }
+
+
+
+      .topbar {
+
+        margin-bottom: 5px;
+
+      }
+
+
+
+      .resumen {
+
+        margin-bottom: 5px;
+
+        padding: 5px 8px;
+
+      }
+
+
+
+      .head {
+
+        min-height: 42px;
+
+        padding: 5px 4px;
+
+      }
+
+
+
+      .slot,
+
+      .time {
+
+        min-height: 48px;
+
+      }
+
+    }
+
+
+
+    @media (max-width: 520px) {
+
+
+
+      .resumen {
+
+        gap: 8px;
+
+      }
+
+
+
+      .actualizado {
+
+        width: 100%;
+
+        margin-left: 0;
+
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+
+<body>
+
+
+
+  <main class="app">
+
+
+
+    <section class="topbar">
+
+
+
+      <div class="titulo">
+
+
+
+        <h1>Mapa semanal · GGS Concretos</h1>
+
+
+
+        <div
+
+          class="sub"
+
+          id="rango"
+
+        >
+
+          Cargando semana…
+
+        </div>
+
+
+
+      </div>
+
+
+
+      <div class="nav">
+
+
+
+        <button
+
+          id="anterior"
+
+          type="button"
+
+          aria-label="Semana anterior"
+
+        >
+
+          ←
+
+        </button>
+
+
+
+        <button
+
+          id="hoy"
+
+          class="primary"
+
+          type="button"
+
+        >
+
+          Esta semana
+
+        </button>
+
+
+
+        <button
+
+          id="siguiente"
+
+          type="button"
+
+          aria-label="Semana siguiente"
+
+        >
+
+          →
+
+        </button>
+
+
+
+      </div>
+
+
+
+    </section>
+
+
+
+    <div class="orientacion">
+
+      ↻ Para ver los 6 días con mayor comodidad, gira el teléfono a posición horizontal.
+
+    </div>
+
+
+
+    <section class="resumen">
+
+
+
+      <span>
+
+        Pedidos:
+
+        <strong id="totalPedidos">—</strong>
+
+      </span>
+
+
+
+      <span>
+
+        Volumen:
+
+        <strong id="totalVolumen">—</strong>
+
+        m³
+
+      </span>
+
+
+
+      <span
+
+        class="actualizado"
+
+        id="actualizado"
+
+      ></span>
+
+
+
+    </section>
+
+
+
+    <div
+
+      class="sub"
+
+      style="
+
+        margin:0 0 5px;
+
+        color:var(--muted);
+
+        font-size:11px;
+
+      "
+
+    >
+
+      Desliza sobre el calendario para moverte por la semana.
+
+    </div>
+
+
+
+    <section
+
+      class="calendar-wrap"
+
+      id="contenedor"
+
+    >
+
+
+
+      <div class="loading">
+
+        Cargando programación…
+
+      </div>
+
+
+
+    </section>
+
+
+
+  </main>
+
+
+
+  <dialog id="detalle">
+
+
+
+    <div class="modal-head">
+
+
+
+      <h2 id="modalTitulo">
+
+        Detalle del pedido
+
+      </h2>
+
+
+
+      <button
+
+        id="cerrar"
+
+        type="button"
+
+      >
+
+        Cerrar
+
+      </button>
+
+
+
+    </div>
+
+
+
+    <div
+
+      class="modal-body"
+
+      id="modalBody"
+
+    ></div>
+
+
+
+  </dialog>
+
+
+
+  <script>
+
+
+
+    (() => {
+
+
+
+      const API_URL =
+        'https://script.google.com/macros/s/AKfycbxw1uGeG43bFBiBUsoii3l4C80WG6FQxMGidpOCgG41Z-4d-MPloEiUllzPnX3nuICn/exec';
+
+      const $ = id =>
+
+        document.getElementById(id);
+
+
+
+      let lunesActual = null;
+
+
+
+      let semana = null;
+
+
+
+      const esc = valor =>
+
+        String(valor ?? '')
+
+          .replaceAll('&', '&amp;')
+
+          .replaceAll('<', '&lt;')
+
+          .replaceAll('>', '&gt;')
+
+          .replaceAll('"', '&quot;')
+
+          .replaceAll("'", '&#039;');
+
+
+
+      function isoAFecha(iso) {
+
+
+
+        const [y, m, d] =
+
+          iso
+
+            .split('-')
+
+            .map(Number);
+
+
+
+        return new Date(
+
+          y,
+
+          m - 1,
+
+          d,
+
+          12,
+
+          0,
+
+          0,
+
+          0
+
+        );
+
+      }
+
+
+
+      function fechaAIso(fecha) {
+
+
+
+        const y =
+
+          fecha.getFullYear();
+
+
+
+        const m =
+
+          String(
+
+            fecha.getMonth() + 1
+
+          ).padStart(
+
+            2,
+
+            '0'
+
+          );
+
+
+
+        const d =
+
+          String(
+
+            fecha.getDate()
+
+          ).padStart(
+
+            2,
+
+            '0'
+
+          );
+
+
+
+        return \`${y}-${m}-${d}\`;
+
+      }
+
+
+
+      function moverSemana(delta) {
+
+
+
+        if (!lunesActual) {
+
+          return;
+
+        }
+
+
+
+        const f =
+
+          isoAFecha(
+
+            lunesActual
+
+          );
+
+
+
+        f.setDate(
+
+          f.getDate() +
+
+          delta * 7
+
+        );
+
+
+
+        cargar(
+
+          fechaAIso(f)
+
+        );
+
+      }
+
+
+
+      function setBotones(cargando) {
+
+
+
+        $('anterior').disabled =
+
+          cargando;
+
+
+
+        $('hoy').disabled =
+
+          cargando;
+
+
+
+        $('siguiente').disabled =
+
+          cargando;
+
+      }
+
+
+
+      function cargar(fechaReferencia) {
+
+        setBotones(true);
+
+        $('contenedor').innerHTML =
+          '<div class="loading">Cargando programación…</div>';
+
+        const url = new URL(API_URL);
+        url.searchParams.set('api', 'semana');
+
+        if (fechaReferencia) {
+          url.searchParams.set('fecha', fechaReferencia);
+        }
+
+        // Evita reutilizar una respuesta anterior del navegador.
+        url.searchParams.set('_', Date.now());
+
+        fetch(url.toString(), {
+          method: 'GET',
+          cache: 'no-store',
+          redirect: 'follow'
+        })
+          .then(respuesta => {
+            if (!respuesta.ok) {
+              throw new Error(`HTTP ${respuesta.status}`);
+            }
+            return respuesta.json();
+          })
+          .then(datos => {
+            if (datos.ok === false) {
+              throw new Error(datos.error || 'La API devolvió un error.');
+            }
+
+            semana = datos;
+            lunesActual = datos.lunes;
+            render(datos);
+          })
+          .catch(err => {
+            console.error(err);
+
+            $('contenedor').innerHTML =
+              `<div class="error">
+                No fue posible cargar la programación.
+                <br>
+                ${esc(err && err.message ? err.message : err)}
+              </div>`;
+          })
+          .finally(() => {
+            setBotones(false);
+          });
+      }
+
+      function render(datos) {
+
+
+
+        $('rango').textContent =
+
+          datos.rango;
+
+
+
+        $('totalPedidos').textContent =
+
+          datos.totalPedidos;
+
+
+
+        $('totalVolumen').textContent =
+
+          Number(
+
+            datos.totalVolumen
+
+          ).toLocaleString(
+
+            'es-MX',
+
+            {
+
+              maximumFractionDigits: 2
+
+            }
+
+          );
+
+
+
+        $('actualizado').textContent =
+
+          \`Actualizado: ${datos.actualizado}\`;
+
+
+
+        const mapa =
+
+          new Map();
+
+
+
+        datos.dias.forEach(
+
+          (dia, dIndex) => {
+
+
+
+            dia.pedidos.forEach(
+
+              p => {
+
+
+
+                if (
+
+                  !Number.isFinite(
+
+                    p.minutos
+
+                  ) ||
+
+                  p.minutos >= 9999
+
+                ) {
+
+                  return;
+
+                }
+
+
+
+                const bloque =
+
+                  Math.floor(
+
+                    p.minutos / 30
+
+                  ) * 30;
+
+
+
+                const key =
+
+                  \`${dIndex}-${bloque}\`;
+
+
+
+                if (
+
+                  !mapa.has(key)
+
+                ) {
+
+                  mapa.set(
+
+                    key,
+
+                    []
+
+                  );
+
+                }
+
+
+
+                mapa
+
+                  .get(key)
+
+                  .push(p);
+
+              }
+
+            );
+
+          }
+
+        );
+
+
+
+        let html =
+
+          '<div class="calendar">';
+
+
+
+        html +=
+
+          \`
+
+          <div class="head hora-head">
+
+            <span class="dia">
+
+              Hora
+
+            </span>
+
+          </div>
+
+          \`;
+
+
+
+        datos.dias.forEach(
+
+          d => {
+
+
+
+            html +=
+
+              \`
+
+              <div class="head">
+
+
+
+                <span class="dia">
+
+                  ${esc(d.nombre)}
+
+                </span>
+
+
+
+                <span class="fecha">
+
+                  ${esc(d.etiqueta)}
+
+                </span>
+
+
+
+              </div>
+
+              \`;
+
+          }
+
+        );
+
+
+
+        const inicio =
+
+          datos.horaInicio * 60;
+
+
+
+        const fin =
+
+          datos.horaFin * 60;
+
+
+
+        for (
+
+          let min = inicio;
+
+          min <= fin;
+
+          min += 30
+
+        ) {
+
+
+
+          const hh =
+
+            String(
+
+              Math.floor(
+
+                min / 60
+
+              )
+
+            ).padStart(
+
+              2,
+
+              '0'
+
+            );
+
+
+
+          const mm =
+
+            String(
+
+              min % 60
+
+            ).padStart(
+
+              2,
+
+              '0'
+
+            );
+
+
+
+          html +=
+
+            \`
+
+            <div class="time">
+
+              ${hh}:${mm}
+
+            </div>
+
+            \`;
+
+
+
+          for (
+
+            let dIndex = 0;
+
+            dIndex < 6;
+
+            dIndex++
+
+          ) {
+
+
+
+            const pedidos =
+
+              mapa.get(
+
+                \`${dIndex}-${min}\`
+
+              ) || [];
+
+
+
+            html +=
+
+              \`
+
+              <div
+
+                class="slot ${
+
+                  pedidos.length
+
+                    ? ''
+
+                    : 'empty'
+
+                }"
+
+              >
+
+              \`;
+
+
+
+            pedidos.forEach(
+
+              p => {
+
+
+
+                const idx =
+
+                  semana
+
+                    .dias[dIndex]
+
+                    .pedidos
+
+                    .indexOf(p);
+
+
+
+                html +=
+
+                  \`
+
+                  <button
+
+                    class="pedido"
+
+                    type="button"
+
+                    data-dia="${dIndex}"
+
+                    data-idx="${idx}"
+
+                    title="Ver detalle"
+
+                  >
+
+
+
+                    <div class="linea1">
+
+
+
+                      <span>
+
+                        ${esc(p.hora)}
+
+                      </span>
+
+
+
+                      <span>
+
+                        ${
+
+                          Number(
+
+                            p.volumen
+
+                          ).toLocaleString(
+
+                            'es-MX',
+
+                            {
+
+                              maximumFractionDigits: 2
+
+                            }
+
+                          )
+
+                        }
+
+                        m³
+
+                      </span>
+
+
+
+                    </div>
+
+
+
+                    <div class="cliente">
+
+                      ${
+
+                        esc(
+
+                          p.cliente ||
+
+                          'Sin cliente'
+
+                        )
+
+                      }
+
+                    </div>
+
+
+
+                    <div class="obra">
+
+                      ${
+
+                        esc(
+
+                          p.obra ||
+
+                          'Sin obra'
+
+                        )
+
+                      }
+
+                    </div>
+
+
+
+                  </button>
+
+                  \`;
+
+              }
+
+            );
+
+
+
+            html +=
+
+              '</div>';
+
+          }
+
+        }
+
+
+
+        html +=
+
+          '</div>';
+
+
+
+        $('contenedor').innerHTML =
+
+          html;
+
+
+
+        $('contenedor')
+
+          .querySelectorAll(
+
+            '.pedido'
+
+          )
+
+          .forEach(
+
+            btn => {
+
+
+
+              let x0 = 0;
+
+
+
+              let y0 = 0;
+
+
+
+              let moved =
+
+                false;
+
+
+
+              btn.addEventListener(
+
+                'pointerdown',
+
+                e => {
+
+
+
+                  x0 =
+
+                    e.clientX;
+
+
+
+                  y0 =
+
+                    e.clientY;
+
+
+
+                  moved =
+
+                    false;
+
+                }
+
+              );
+
+
+
+              btn.addEventListener(
+
+                'pointermove',
+
+                e => {
+
+
+
+                  if (
+
+                    Math.abs(
+
+                      e.clientX - x0
+
+                    ) > 8 ||
+
+                    Math.abs(
+
+                      e.clientY - y0
+
+                    ) > 8
+
+                  ) {
+
+                    moved =
+
+                      true;
+
+                  }
+
+                }
+
+              );
+
+
+
+              btn.addEventListener(
+
+                'click',
+
+                e => {
+
+
+
+                  if (moved) {
+
+
+
+                    e.preventDefault();
+
+
+
+                    return;
+
+                  }
+
+
+
+                  const d =
+
+                    Number(
+
+                      btn.dataset.dia
+
+                    );
+
+
+
+                  const i =
+
+                    Number(
+
+                      btn.dataset.idx
+
+                    );
+
+
+
+                  abrirDetalle(
+
+                    semana
+
+                      .dias[d]
+
+                      .pedidos[i]
+
+                  );
+
+                }
+
+              );
+
+            }
+
+          );
+
+      }
+
+
+
+      function abrirDetalle(p) {
+
+
+
+        $('modalTitulo').textContent =
+
+          \`${p.hora} · ${p.cliente || 'Pedido'}\`;
+
+
+
+        const filas = [
+
+
+
+          [
+
+            'Folio',
+
+            p.folio
+
+          ],
+
+
+
+          [
+
+            'Cliente',
+
+            p.cliente
+
+          ],
+
+
+
+          [
+
+            'Obra',
+
+            p.obra
+
+          ],
+
+
+
+          [
+
+            'Volumen',
+
+            \`${
+
+              Number(
+
+                p.volumen
+
+              ).toLocaleString(
+
+                'es-MX',
+
+                {
+
+                  maximumFractionDigits: 2
+
+                }
+
+              )
+
+            } m³\`
+
+          ],
+
+
+
+          [
+
+            'Resistencia',
+
+            p.resistencia
+
+          ],
+
+
+
+          [
+
+            'Servicio',
+
+            p.servicio
+
+          ],
+
+
+
+          [
+
+            'Elemento',
+
+            p.elemento
+
+          ],
+
+
+
+          [
+
+            'Vendedor',
+
+            p.vendedor
+
+          ],
+
+
+
+          [
+
+            'Estatus',
+
+            p.estatus
+
+          ],
+
+
+
+          [
+
+            'Observaciones',
+
+            p.observaciones
+
+          ]
+
+
+
+        ].filter(
+
+          ([, v]) =>
+
+            String(
+
+              v || ''
+
+            ).trim() !== ''
+
+        );
+
+
+
+        $('modalBody').innerHTML =
+
+          filas
+
+            .map(
+
+              ([k, v]) =>
+
+                \`
+
+                <div class="dato">
+
+
+
+                  <b>
+
+                    ${esc(k)}
+
+                  </b>
+
+
+
+                  <span>
+
+                    ${esc(v)}
+
+                  </span>
+
+
+
+                </div>
+
+                \`
+
+            )
+
+            .join('');
+
+
+
+        $('detalle')
+
+          .showModal();
+
+      }
+
+
+
+      $('anterior')
+
+        .addEventListener(
+
+          'click',
+
+          () =>
+
+            moverSemana(-1)
+
+        );
+
+
+
+      $('siguiente')
+
+        .addEventListener(
+
+          'click',
+
+          () =>
+
+            moverSemana(1)
+
+        );
+
+
+
+      $('hoy')
+
+        .addEventListener(
+
+          'click',
+
+          () =>
+
+            cargar('')
+
+        );
+
+
+
+      $('cerrar')
+
+        .addEventListener(
+
+          'click',
+
+          () =>
+
+            $('detalle')
+
+              .close()
+
+        );
+
+
+
+      $('detalle')
+
+        .addEventListener(
+
+          'click',
+
+          e => {
+
+
+
+            if (
+
+              e.target ===
+
+              $('detalle')
+
+            ) {
+
+
+
+              $('detalle')
+
+                .close();
+
+            }
+
+          }
+
+        );
+
+
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('./service-worker.js')
+            .catch(err =>
+              console.warn('Service Worker no disponible todavía:', err)
+            );
+        });
+      }
+
+      cargar('');
+
+
+
+    })();
+
+
+
+  </script>
+
+
+
+</body>
+
+</html>
