@@ -1360,55 +1360,103 @@
 
 
       function cargar(fechaReferencia) {
-
         setBotones(true);
 
         $('contenedor').innerHTML =
           '<div class="loading">Cargando programación…</div>';
 
+        const callbackName =
+          '__agendaGGS_' + Date.now() + '_' +
+          Math.random().toString(36).slice(2);
+
+        const script = document.createElement('script');
+
         const url = new URL(API_URL);
         url.searchParams.set('api', 'semana');
+        url.searchParams.set('callback', callbackName);
 
         if (fechaReferencia) {
           url.searchParams.set('fecha', fechaReferencia);
         }
 
-        // Evita reutilizar una respuesta anterior del navegador.
-        url.searchParams.set('_', Date.now());
+        let terminado = false;
 
-        fetch(url.toString(), {
-          method: 'GET',
-          cache: 'no-store',
-          redirect: 'follow'
-        })
-          .then(respuesta => {
-            if (!respuesta.ok) {
-              throw new Error(`HTTP ${respuesta.status}`);
-            }
-            return respuesta.json();
-          })
-          .then(datos => {
-            if (datos.ok === false) {
-              throw new Error(datos.error || 'La API devolvió un error.');
+        function limpiar() {
+          if (script.parentNode) {
+            script.parentNode.removeChild(script);
+          }
+
+          try {
+            delete window[callbackName];
+          } catch (e) {
+            window[callbackName] = undefined;
+          }
+        }
+
+        const timeout = setTimeout(() => {
+          if (terminado) return;
+
+          terminado = true;
+          limpiar();
+          setBotones(false);
+
+          $('contenedor').innerHTML =
+            '<div class="error">' +
+            'La Agenda tardó demasiado en responder.' +
+            '</div>';
+        }, 20000);
+
+        window[callbackName] = function(datos) {
+          if (terminado) return;
+
+          terminado = true;
+          clearTimeout(timeout);
+          limpiar();
+
+          try {
+            if (!datos || datos.ok === false) {
+              throw new Error(
+                datos && datos.error
+                  ? datos.error
+                  : 'La API devolvió un error.'
+              );
             }
 
             semana = datos;
             lunesActual = datos.lunes;
+
             render(datos);
-          })
-          .catch(err => {
+
+          } catch (err) {
             console.error(err);
 
             $('contenedor').innerHTML =
-              `<div class="error">
-                No fue posible cargar la programación.
-                <br>
-                ${esc(err && err.message ? err.message : err)}
-              </div>`;
-          })
-          .finally(() => {
-            setBotones(false);
-          });
+              '<div class="error">' +
+              'No fue posible cargar la programación.<br>' +
+              esc(err && err.message ? err.message : err) +
+              '</div>';
+          }
+
+          setBotones(false);
+        };
+
+        script.onerror = function() {
+          if (terminado) return;
+
+          terminado = true;
+          clearTimeout(timeout);
+          limpiar();
+          setBotones(false);
+
+          $('contenedor').innerHTML =
+            '<div class="error">' +
+            'No fue posible conectar con la Agenda.' +
+            '</div>';
+        };
+
+        script.src = url.toString();
+
+        document.body.appendChild(script);
       }
 
       function render(datos) {
