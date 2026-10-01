@@ -1,0 +1,19 @@
+{
+  "name": "Agenda GGS",
+  "short_name": "Agenda GGS",
+  "description": "Mapa semanal de programación de GGS Concretos",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f6f5",
+  "theme_color": "#0b5d3b",
+  "icons": [
+    {
+      "src": "../favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
