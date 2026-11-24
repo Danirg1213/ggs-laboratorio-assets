@@ -1,10 +1,16 @@
-const CACHE_NAME = 'agenda-ggs-v2';
+const CACHE_NAME = 'agenda-ggs-v3';
 
 const APP_SHELL = [
   './',
   './index.html',
   './calculadora.html',
   './calculadora.js',
+  './diagrama-losa.png',
+  './diagrama-muro.png',
+  './diagrama-prisma.png',
+  './diagrama-cilindro.png',
+  './diagrama-escalera.png',
+  './diagrama-tubo.png',
   './manifest.json',
   '../favicon-192.png'
 ];

@@ -17,7 +17,9 @@
     label { display: block; font-weight: bold; }
     input, select, button { width: 100%; min-height: 44px; border-radius: 6px; font: inherit; }
     input, select { margin-top: .3rem; padding: .5rem; border: 1px solid #74877e; color: inherit; background: #fff; }
-    .campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .85rem; margin: .85rem 0; }
+    .campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .85rem; margin: .85rem 0; }
+    .diagrama { display: block; width: 100%; height: auto; margin-top: 1rem; border: 1px solid #dbe3df; border-radius: 8px; }
+    .ampliar { display: inline-block; margin-top: .4rem; font-size: .875rem; }
     .campos label[hidden] { display: none; }
     button { padding: .65rem; border: 0; background: #0b5d3b; color: #fff; font-weight: bold; cursor: pointer; }
     section { margin-top: 1rem; background: #eaf4ef; }
@@ -39,8 +41,13 @@
           <option value="muro">Muro</option>
           <option value="prisma">Zapata, trabe o columna rectangular</option>
           <option value="cilindro">Columna circular</option>
+          <option value="escalera">Escalera recta maciza</option>
+          <option value="tubo">Tubo hueco</option>
         </select>
       </label>
+      <img id="diagrama" class="diagrama" src="./diagrama-losa.png" width="552" height="278"
+        alt="Losa con largo y ancho en planta y espesor vertical.">
+      <a id="ampliar" class="ampliar" href="./diagrama-losa.png" target="_blank" rel="noopener">Ampliar diagrama</a>
       <div class="campos" id="dimensiones"></div>
       <div class="campos">
         <label>Cantidad de piezas
